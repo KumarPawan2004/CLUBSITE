@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Eye, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -18,25 +18,20 @@ const MOCK_POSTS = [
 
 export default function AdminPostsPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All Status");
+  const [categoryFilter, setCategoryFilter] = useState("All Categories");
+
+  const filteredPosts = MOCK_POSTS.filter((post) => {
+    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "All Status" || post.status === statusFilter;
+    const matchesCategory = categoryFilter === "All Categories" || post.category === categoryFilter;
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
-          <p className="text-foreground/60 mt-1">Manage all blog posts, news, and updates.</p>
-        </div>
-        <Link href="/admin/posts/create">
-          <Button className="gap-2">
-            <Plus className="w-4 h-4" />
-            Create Post
-          </Button>
-        </Link>
-      </div>
-
       {/* Filters and Search */}
-      <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between mt-2">
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
           <input
@@ -48,27 +43,25 @@ export default function AdminPostsPage() {
           />
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm">
-            <Filter className="w-4 h-4 text-foreground/50" />
-            <select 
-              className="bg-transparent border-none outline-none text-foreground/80 cursor-pointer"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="All">All Status</option>
-              <option value="Published">Published</option>
-              <option value="Draft">Draft</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm">
-            <select className="bg-transparent border-none outline-none text-foreground/80 cursor-pointer">
-              <option>All Categories</option>
-              <option>Technology</option>
-              <option>Events</option>
-              <option>News</option>
-              <option>Sports</option>
-            </select>
-          </div>
+          <CustomDropdown 
+            icon={<Filter className="w-4 h-4 text-foreground/50" />}
+            value={statusFilter}
+            options={["All Status", "Published", "Draft"]}
+            onChange={setStatusFilter}
+          />
+          <CustomDropdown 
+            value={categoryFilter}
+            options={["All Categories", "Technology", "Events", "News", "Sports", "Alumni"]}
+            onChange={setCategoryFilter}
+          />
+          <div className="w-px h-6 bg-white/10 hidden sm:block" />
+          <Link href="/admin/posts/create">
+            <Button className="gap-2">
+              <Plus className="w-4 h-4" />
+              <div className="w-px h-4 bg-white/30" />
+              Create Post
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -87,7 +80,7 @@ export default function AdminPostsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {MOCK_POSTS.map((post, index) => (
+              {filteredPosts.length > 0 ? filteredPosts.map((post, index) => (
                 <motion.tr 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -131,7 +124,13 @@ export default function AdminPostsPage() {
                     </div>
                   </td>
                 </motion.tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-foreground/50">
+                    No posts found matching the selected filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -148,6 +147,62 @@ export default function AdminPostsPage() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function CustomDropdown({ value, options, onChange, icon }: { value: string, options: string[], onChange: (val: string) => void, icon?: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl px-4 py-2.5 text-sm text-foreground/80 transition-colors w-full sm:w-auto min-w-[150px] justify-between"
+      >
+        <div className="flex items-center gap-2">
+          {icon}
+          {value}
+        </div>
+        <ChevronDown className={cn("w-4 h-4 text-foreground/50 transition-transform", isOpen && "rotate-180")} />
+      </button>
+      
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-full mt-2 left-0 w-full min-w-[160px] bg-background/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 p-1.5 flex flex-col gap-0.5"
+        >
+          {options.map((opt) => (
+            <button
+              key={opt}
+              onClick={() => {
+                onChange(opt);
+                setIsOpen(false);
+              }}
+              className={cn(
+                "px-3 py-2 text-sm text-left rounded-lg transition-colors",
+                value === opt ? "bg-primary/20 text-primary font-medium" : "text-foreground/80 hover:bg-white/10 hover:text-foreground"
+              )}
+            >
+              {opt}
+            </button>
+          ))}
+        </motion.div>
+      )}
     </div>
   );
 }

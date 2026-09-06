@@ -81,13 +81,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="h-full glass-card border-y-0 border-l-0 rounded-none z-10 flex flex-col relative shrink-0"
       >
-        <div className="h-20 flex items-center px-6 border-b border-white/5">
-          <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
-              <Terminal className="w-5 h-5 text-primary" />
-            </div>
-            {!collapsed && <span className="font-bold text-xl tracking-tight whitespace-nowrap">Eimples Admin</span>}
-          </Link>
+        <div className={cn("h-12 flex items-center border-b border-white/5", collapsed ? "justify-center" : "px-6 justify-between")}>
+          {!collapsed && (
+            <Link href="/admin" className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
+                <Terminal className="w-3 h-3 text-primary" />
+              </div>
+              <span className="font-bold text-xl tracking-tight whitespace-nowrap">Eimples</span>
+            </Link>
+          )}
+          <button 
+            onClick={() => setCollapsed(!collapsed)}
+            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors shrink-0"
+          >
+            <MenuIcon className="w-5 h-5" />
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto py-6 px-3 flex flex-col gap-1 custom-scrollbar">
@@ -144,24 +152,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full overflow-hidden z-10 relative">
-        <header className="h-20 glass-nav shrink-0 flex items-center justify-between px-8 border-b border-white/5 z-20">
+        <header className="h-12 glass-nav shrink-0 flex items-center justify-end px-8 border-b border-white/5 z-20">
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setCollapsed(!collapsed)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors"
-            >
-              <MenuIcon className="w-5 h-5" />
-            </button>
-            <h1 className="text-xl font-semibold capitalize">
-              {pathname.split("/").pop() || "Dashboard"}
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors relative">
+            <button className="w-8 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors relative">
               <Bell className="w-5 h-5 text-foreground/70" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
             </button>
-            <div className="w-10 h-10 rounded-full bg-primary/20 overflow-hidden border border-primary/30 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-primary/20 overflow-hidden border border-primary/30 flex items-center justify-center">
               <User className="w-5 h-5 text-primary" />
             </div>
           </div>

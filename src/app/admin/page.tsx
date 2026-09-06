@@ -16,7 +16,6 @@ export default function AdminDashboard() {
         </div>
         <div className="flex gap-3">
           <Button variant="outline">Download Report</Button>
-          <Button>Create Post</Button>
         </div>
       </div>
 
