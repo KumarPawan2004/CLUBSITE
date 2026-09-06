@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Upload, Search, Filter, Trash2, CheckSquare, Square, File as FileIcon, FileText, Film, Image as ImageIcon, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
 const MOCK_MEDIA = [
   { id: 1, name: "campus_front.jpg", type: "image", size: "2.4 MB", date: "Aug 18, 2026", url: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=500&q=80" },
@@ -19,6 +20,12 @@ export default function AdminMediaLibraryPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMedia, setSelectedMedia] = useState<number[]>([]);
+  const [typeFilter, setTypeFilter] = useState("All Types");
+
+  const filteredMedia = MOCK_MEDIA.filter(item => 
+    (typeFilter === "All Types" || item.type === typeFilter.toLowerCase().replace("s", "")) &&
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const toggleSelect = (id: number) => {
     if (selectedMedia.includes(id)) {
@@ -63,14 +70,13 @@ export default function AdminMediaLibraryPage() {
               className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             />
           </div>
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm">
-            <Filter className="w-4 h-4 text-foreground/50" />
-            <select className="bg-transparent border-none outline-none text-foreground/80 cursor-pointer">
-              <option>All Types</option>
-              <option>Images</option>
-              <option>Documents</option>
-              <option>Videos</option>
-            </select>
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <CustomDropdown 
+              icon={<Filter className="w-3.5 h-3.5 text-foreground/50" />}
+              value={typeFilter}
+              options={["All Types", "Images", "Documents", "Videos"]}
+              onChange={setTypeFilter}
+            />
           </div>
         </div>
         
@@ -103,7 +109,7 @@ export default function AdminMediaLibraryPage() {
       {/* Media Grid View */}
       {viewMode === "grid" && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {MOCK_MEDIA.map((item, index) => {
+          {filteredMedia.map((item, index) => {
             const isSelected = selectedMedia.includes(item.id);
             return (
               <motion.div 
@@ -167,7 +173,7 @@ export default function AdminMediaLibraryPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {MOCK_MEDIA.map((item, index) => {
+                {filteredMedia.map((item, index) => {
                   const isSelected = selectedMedia.includes(item.id);
                   return (
                     <motion.tr 

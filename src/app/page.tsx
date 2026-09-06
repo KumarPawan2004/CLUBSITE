@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Image from "next/image";
+import Link from "next/link";
+import { upcomingEvents } from "@/data/mock";
 
 export default function Home() {
   const containerRef = useRef(null);
@@ -78,6 +80,7 @@ export default function Home() {
 
             <Button
               className="w-full sm:w-auto h-11 px-6 gap-2 group text-sm"
+              onClick={() => document.getElementById('clubs')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Explore Clubs
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -86,6 +89,7 @@ export default function Home() {
             <Button
               variant="glass"
               className="w-full sm:w-auto h-11 px-6 text-sm"
+              onClick={() => document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Upcoming Events
             </Button>
@@ -102,39 +106,67 @@ export default function Home() {
       </section>
 
       {/* Upcoming Events Section */}
-      <section className="py-0 relative ">
+      <section id="events" className="py-0 relative mt-24 scroll-mt-24">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="text-3xl md:text-3xl font-bold tracking-tight mb-3">Upcoming Events</h2>
               <p className="text-foreground/60 text-m">Don't miss out on what's happening on campus.</p>
             </div>
-            <Button variant="ghost" className="hidden md:flex">View Calendar <ArrowRight className="w-4 h-4 ml-2" /></Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <EventCard
-              title="HackSprint 2026: AI & Web3"
-              category="Tech Club"
-              date="Oct 15, 2026"
-              time="09:00 AM - 48 Hours"
-              venue="Main Auditorium, ACE Lab"
-              gradient="from-blue-500/20 to-purple-500/20"
-            />
-            <EventCard
-              title="Annual Sports Meet: Inter-Branch"
-              category="Sports Club"
-              date="Nov 02, 2026"
-              time="08:00 AM Onwards"
-              venue="University Ground"
-              gradient="from-green-500/20 to-emerald-500/20"
-            />
+            {upcomingEvents.map((event, i) => (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="glass-card rounded-3xl overflow-hidden group"
+              >
+                <div className="h-48 bg-gradient-to-br from-primary/20 to-blue-500/20 p-6 flex flex-col justify-between relative overflow-hidden">
+                  <span className="relative inline-block px-3 py-1 bg-background/50 backdrop-blur-md rounded-full text-xs font-semibold w-max border border-white/10">
+                    {event.category}
+                  </span>
+                  <h3 className="relative text-2xl font-bold max-w-[80%] leading-tight text-white">{event.title}</h3>
+                </div>
+                <div className="p-6">
+                  <p className="text-foreground/70 mb-6 text-sm line-clamp-2">{event.description}</p>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="flex items-start gap-3">
+                      <Calendar className="w-5 h-5 text-primary shrink-0" />
+                      <div>
+                        <p className="text-xs text-foreground/50 mb-0.5">Date</p>
+                        <p className="text-sm font-medium">{event.date}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Clock className="w-5 h-5 text-primary shrink-0" />
+                      <div>
+                        <p className="text-xs text-foreground/50 mb-0.5">Time</p>
+                        <p className="text-sm font-medium">{event.time}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 col-span-2">
+                      <MapPin className="w-5 h-5 text-primary shrink-0" />
+                      <div>
+                        <p className="text-xs text-foreground/50 mb-0.5">Venue</p>
+                        <p className="text-sm font-medium">{event.venue}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <Button className="w-full">View Details & Register</Button>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Clubs Section */}
-      <section className="py-24 relative bg-white/[0.02] border-y border-white/5">
+      <section id="clubs" className="py-24 relative bg-white/[0.02] border-y border-white/5 scroll-mt-20">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center text-center mb-16">
             <h2 className="text-3xl md:text-3xl font-bold tracking-tight mb-2">Campus Communities</h2>
@@ -146,6 +178,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <ClubCard
               title="Tech Club"
+              slug="tech-club"
               description="Explore AI, Cloud computing, Cybersecurity, and open-source projects."
               icon={<Code className="w-8 h-8 text-blue-400" />}
               color="bg-blue-500/10 border-blue-500/20"
@@ -153,6 +186,7 @@ export default function Home() {
             />
             <ClubCard
               title="Sports Club"
+              slug="sports-club"
               description="Participate in tournaments, athletics, and inter-university competitions."
               icon={<Trophy className="w-8 h-8 text-green-400" />}
               color="bg-green-500/10 border-green-500/20"
@@ -160,6 +194,7 @@ export default function Home() {
             />
             <ClubCard
               title="Cultural Club"
+              slug="cultural-club"
               description="Express yourself through music, dance, drama, and fine arts."
               icon={<Users className="w-8 h-8 text-purple-400" />}
               color="bg-purple-500/10 border-purple-500/20"
@@ -201,7 +236,9 @@ export default function Home() {
                 <NoticeItem title="Call for Research Papers - IEEE Conference" date="Oct 08, 2026" />
                 <NoticeItem title="Holiday Declaration: Diwali Break" date="Oct 05, 2026" />
                 <NoticeItem title="Library Membership Renewal Notice" date="Oct 01, 2026" />
-                <Button variant="outline" className="w-full mt-2">View All Notices</Button>
+                <Link href="/notice" className="w-full mt-2">
+                  <Button variant="outline" className="w-full">View All Notices</Button>
+                </Link>
               </div>
             </div>
 
@@ -216,7 +253,9 @@ export default function Home() {
               <h2 className="text-3xl md:text-3xl font-bold tracking-tight mb-2">Campus Life Gallery</h2>
               <p className="text-foreground/60 text-m">Glimpses of our vibrant community and events.</p>
             </div>
-            <Button variant="outline" className="hidden md:flex">View Full Gallery</Button>
+            <Link href="/gallery">
+              <Button variant="outline" className="hidden md:flex">View Full Gallery</Button>
+            </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
             <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden glass-card relative group">
@@ -291,56 +330,8 @@ function StatCard({ icon, count, label, delay }: { icon: React.ReactNode, count:
   );
 }
 
-function EventCard({ title, category, date, time, venue, gradient }: { title: string, category: string, date: string, time: string, venue: string, gradient: string }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      whileHover={{ y: -5 }}
-      className="glass-card rounded-3xl overflow-hidden group"
-    >
-      <div className={`h-48 bg-gradient-to-br ${gradient} p-6 flex flex-col justify-between relative overflow-hidden`}>
-        <div className="absolute inset-0 bg-black/20" />
-        <span className="relative inline-block px-3 py-1 bg-background/50 backdrop-blur-md rounded-full text-xs font-semibold w-max border border-white/10">
-          {category}
-        </span>
-        <h3 className="relative text-2xl font-bold max-w-[80%] leading-tight text-white">{title}</h3>
-      </div>
-      <div className="p-6">
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="flex items-start gap-3">
-            <Calendar className="w-5 h-5 text-primary shrink-0" />
-            <div>
-              <p className="text-sm text-foreground/60 mb-0.5">Date</p>
-              <p className="text-sm font-medium">{date}</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Clock className="w-5 h-5 text-primary shrink-0" />
-            <div>
-              <p className="text-sm text-foreground/60 mb-0.5">Time</p>
-              <p className="text-sm font-medium">{time}</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3 col-span-2">
-            <MapPin className="w-5 h-5 text-primary shrink-0" />
-            <div>
-              <p className="text-sm text-foreground/60 mb-0.5">Venue</p>
-              <p className="text-sm font-medium">{venue}</p>
-            </div>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <Button className="flex-1">Register Now</Button>
-          <Button variant="glass" size="icon"><Share2 className="w-4 h-4" /></Button>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
-function ClubCard({ title, description, icon, color, glow }: { title: string, description: string, icon: React.ReactNode, color: string, glow: string }) {
+function ClubCard({ title, description, icon, color, glow, slug }: { title: string, description: string, icon: React.ReactNode, color: string, glow: string, slug: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -355,10 +346,12 @@ function ClubCard({ title, description, icon, color, glow }: { title: string, de
       </div>
       <h3 className="text-2xl font-bold mb-3">{title}</h3>
       <p className="text-foreground/60 mb-8 flex-1 leading-relaxed">{description}</p>
-      <Button variant="ghost" className="p-0 hover:bg-transparent hover:text-primary group/btn">
-        Explore {title}
-        <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
-      </Button>
+      <Link href={`/clubs/${slug}`}>
+        <Button variant="ghost" className="p-0 hover:bg-transparent hover:text-primary group/btn">
+          Explore {title}
+          <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+        </Button>
+      </Link>
     </motion.div>
   );
 }

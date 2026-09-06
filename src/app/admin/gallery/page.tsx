@@ -104,14 +104,7 @@ export default function AdminGalleryPage() {
               </div>
             </motion.div>
           ))}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="border-2 border-dashed border-white/10 rounded-2xl h-48 flex flex-col items-center justify-center text-center gap-3 hover:bg-white/[0.02] transition-colors cursor-pointer text-foreground/60 hover:text-foreground hover:border-white/30"
-          >
-            <FolderPlus className="w-8 h-8" />
-            <span className="font-medium">Create New Album</span>
-          </motion.div>
+
         </div>
       )}
 

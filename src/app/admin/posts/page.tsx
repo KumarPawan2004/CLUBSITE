@@ -30,8 +30,21 @@ export default function AdminPostsPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
+          <p className="text-foreground/60 mt-1">Manage blog posts, announcements, and articles.</p>
+        </div>
+        <Link href="/admin/posts/create">
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" />
+            Create Post
+          </Button>
+        </Link>
+      </div>
+
       {/* Filters and Search */}
-      <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between mt-2">
+      <div className="glass-card p-3 rounded-2xl flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
           <input
@@ -39,12 +52,12 @@ export default function AdminPostsPage() {
             placeholder="Search posts..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
           />
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <CustomDropdown 
-            icon={<Filter className="w-4 h-4 text-foreground/50" />}
+            icon={<Filter className="w-3.5 h-3.5 text-foreground/50" />}
             value={statusFilter}
             options={["All Status", "Published", "Draft"]}
             onChange={setStatusFilter}
@@ -54,14 +67,6 @@ export default function AdminPostsPage() {
             options={["All Categories", "Technology", "Events", "News", "Sports", "Alumni"]}
             onChange={setCategoryFilter}
           />
-          <div className="w-px h-6 bg-white/10 hidden sm:block" />
-          <Link href="/admin/posts/create">
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              <div className="w-px h-4 bg-white/30" />
-              Create Post
-            </Button>
-          </Link>
         </div>
       </div>
 
@@ -171,13 +176,13 @@ function CustomDropdown({ value, options, onChange, icon }: { value: string, opt
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl px-4 py-2.5 text-sm text-foreground/80 transition-colors w-full sm:w-auto min-w-[150px] justify-between"
+        className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl px-3 py-1.5 text-sm text-foreground/80 transition-colors w-full sm:w-auto min-w-[130px] justify-between h-9"
       >
         <div className="flex items-center gap-2">
           {icon}
           {value}
         </div>
-        <ChevronDown className={cn("w-4 h-4 text-foreground/50 transition-transform", isOpen && "rotate-180")} />
+        <ChevronDown className={cn("w-3.5 h-3.5 text-foreground/50 transition-transform", isOpen && "rotate-180")} />
       </button>
       
       {isOpen && (

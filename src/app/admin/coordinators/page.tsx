@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Search, Filter, Edit, Trash2, Mail, Phone, ExternalLink, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
 const MOCK_COORDINATORS = [
   { id: 1, name: "Arjun Mehta", role: "President", course: "B.Tech CSE - 4th Year", responsibility: "Overall Management", email: "arjun.m@student.ybn.edu", phone: "+91 98765 12340", photo: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=500&q=80" },
@@ -15,6 +16,13 @@ const MOCK_COORDINATORS = [
 export default function AdminCoordinatorsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [roleFilter, setRoleFilter] = useState("All Roles");
+  const [modalRole, setModalRole] = useState("President");
+
+  const filteredCoordinators = MOCK_COORDINATORS.filter(coordinator => 
+    (roleFilter === "All Roles" || coordinator.role.includes(roleFilter.replace("Heads", "Head").replace("Members", "Member"))) &&
+    coordinator.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto">
@@ -30,7 +38,7 @@ export default function AdminCoordinatorsPage() {
       </div>
 
       {/* Filters and Search */}
-      <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div className="glass-card p-3 rounded-2xl flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
           <input
@@ -38,26 +46,22 @@ export default function AdminCoordinatorsPage() {
             placeholder="Search coordinators..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
           />
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm">
-            <Filter className="w-4 h-4 text-foreground/50" />
-            <select className="bg-transparent border-none outline-none text-foreground/80 cursor-pointer">
-              <option>All Roles</option>
-              <option>President</option>
-              <option>Vice President</option>
-              <option>Heads</option>
-              <option>Members</option>
-            </select>
-          </div>
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <CustomDropdown 
+            icon={<Filter className="w-3.5 h-3.5 text-foreground/50" />}
+            value={roleFilter}
+            options={["All Roles", "President", "Vice President", "Heads", "Members"]}
+            onChange={setRoleFilter}
+          />
         </div>
       </div>
 
       {/* Coordinators Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {MOCK_COORDINATORS.map((coordinator, index) => (
+        {filteredCoordinators.map((coordinator, index) => (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -138,13 +142,12 @@ export default function AdminCoordinatorsPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">Role</label>
-                  <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all cursor-pointer">
-                    <option>President</option>
-                    <option>Vice President</option>
-                    <option>Technical Head</option>
-                    <option>PR Head</option>
-                    <option>Executive Member</option>
-                  </select>
+                  <CustomDropdown 
+                    value={modalRole}
+                    options={["President", "Vice President", "Technical Head", "PR Head", "Executive Member"]}
+                    onChange={setModalRole}
+                    buttonClassName="px-4 py-2.5 h-[42px]"
+                  />
                 </div>
               </div>
               

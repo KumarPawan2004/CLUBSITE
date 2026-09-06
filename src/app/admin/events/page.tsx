@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Search, Filter, Calendar as CalendarIcon, MapPin, Clock, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Search, Filter, Calendar as CalendarIcon, MapPin, Clock, Edit, Trash2, Eye, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -17,9 +17,11 @@ const MOCK_EVENTS = [
 export default function AdminEventsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [typeFilter, setTypeFilter] = useState("All Types");
 
   const filteredEvents = MOCK_EVENTS.filter(event => 
     (activeTab === "upcoming" ? event.status === "Upcoming" : event.status === "Past") &&
+    (typeFilter === "All Types" || event.type === typeFilter) &&
     event.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -54,7 +56,7 @@ export default function AdminEventsPage() {
       </div>
 
       {/* Filters and Search */}
-      <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div className="glass-card p-3 rounded-2xl flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
           <input
@@ -62,20 +64,16 @@ export default function AdminEventsPage() {
             placeholder="Search events..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
           />
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm">
-            <Filter className="w-4 h-4 text-foreground/50" />
-            <select className="bg-transparent border-none outline-none text-foreground/80 cursor-pointer">
-              <option>All Types</option>
-              <option>Tech</option>
-              <option>Cultural</option>
-              <option>Workshop</option>
-              <option>Sports</option>
-            </select>
-          </div>
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <CustomDropdown 
+            icon={<Filter className="w-3.5 h-3.5 text-foreground/50" />}
+            value={typeFilter}
+            options={["All Types", "Tech", "Cultural", "Workshop", "Sports"]}
+            onChange={setTypeFilter}
+          />
         </div>
       </div>
 
@@ -141,6 +139,62 @@ export default function AdminEventsPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function CustomDropdown({ value, options, onChange, icon }: { value: string, options: string[], onChange: (val: string) => void, icon?: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl px-3 py-1.5 text-sm text-foreground/80 transition-colors w-full sm:w-auto min-w-[130px] justify-between h-9"
+      >
+        <div className="flex items-center gap-2">
+          {icon}
+          {value}
+        </div>
+        <ChevronDown className={cn("w-3.5 h-3.5 text-foreground/50 transition-transform", isOpen && "rotate-180")} />
+      </button>
+      
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-full mt-2 left-0 w-full min-w-[160px] bg-background/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 p-1.5 flex flex-col gap-0.5"
+        >
+          {options.map((opt) => (
+            <button
+              key={opt}
+              onClick={() => {
+                onChange(opt);
+                setIsOpen(false);
+              }}
+              className={cn(
+                "px-3 py-2 text-sm text-left rounded-lg transition-colors",
+                value === opt ? "bg-primary/20 text-primary font-medium" : "text-foreground/80 hover:bg-white/10 hover:text-foreground"
+              )}
+            >
+              {opt}
+            </button>
+          ))}
+        </motion.div>
+      )}
     </div>
   );
 }

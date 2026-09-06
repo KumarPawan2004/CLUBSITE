@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Search, Filter, Trophy, Edit, Trash2, Award, Calendar, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
+import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
 const MOCK_ACHIEVEMENTS = [
   { id: 1, name: "Rahul Sharma", title: "1st Place - National Hackathon", category: "Technology", date: "Aug 10, 2026", desc: "Won the first prize in the Smart India Hackathon 2026 for developing an AI-based agriculture solution.", hasCertificate: true },
@@ -16,6 +16,13 @@ const MOCK_ACHIEVEMENTS = [
 export default function AdminAchievementsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("All Categories");
+  const [modalCategory, setModalCategory] = useState("Technology");
+
+  const filteredAchievements = MOCK_ACHIEVEMENTS.filter(achievement => 
+    (categoryFilter === "All Categories" || achievement.category === categoryFilter) &&
+    achievement.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto">
@@ -31,7 +38,7 @@ export default function AdminAchievementsPage() {
       </div>
 
       {/* Filters and Search */}
-      <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div className="glass-card p-3 rounded-2xl flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
           <input
@@ -39,26 +46,22 @@ export default function AdminAchievementsPage() {
             placeholder="Search achievements..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
           />
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm">
-            <Filter className="w-4 h-4 text-foreground/50" />
-            <select className="bg-transparent border-none outline-none text-foreground/80 cursor-pointer">
-              <option>All Categories</option>
-              <option>Technology</option>
-              <option>Cultural</option>
-              <option>Sports</option>
-              <option>Club</option>
-            </select>
-          </div>
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <CustomDropdown 
+            icon={<Filter className="w-3.5 h-3.5 text-foreground/50" />}
+            value={categoryFilter}
+            options={["All Categories", "Technology", "Cultural", "Sports", "Club"]}
+            onChange={setCategoryFilter}
+          />
         </div>
       </div>
 
       {/* Achievements Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {MOCK_ACHIEVEMENTS.map((achievement, index) => (
+        {filteredAchievements.map((achievement, index) => (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -130,12 +133,12 @@ export default function AdminAchievementsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">Category</label>
-                  <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all cursor-pointer">
-                    <option>Technology</option>
-                    <option>Cultural</option>
-                    <option>Sports</option>
-                    <option>Club</option>
-                  </select>
+                  <CustomDropdown 
+                    value={modalCategory}
+                    options={["Technology", "Cultural", "Sports", "Club"]}
+                    onChange={setModalCategory}
+                    buttonClassName="px-4 py-2.5 h-[42px]"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">Date</label>

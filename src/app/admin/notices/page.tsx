@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Search, Filter, BellRing, Edit, Trash2, Calendar, AlertCircle } from "lucide-react";
+import { Plus, Search, Filter, BellRing, Edit, Trash2, Calendar, AlertCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,12 @@ const MOCK_NOTICES = [
 export default function AdminNoticesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("All Status");
+
+  const filteredNotices = MOCK_NOTICES.filter(notice => 
+    (statusFilter === "All Status" || notice.status === statusFilter) &&
+    notice.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto">
@@ -31,7 +37,7 @@ export default function AdminNoticesPage() {
       </div>
 
       {/* Filters and Search */}
-      <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div className="glass-card p-3 rounded-2xl flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
           <input
@@ -39,25 +45,22 @@ export default function AdminNoticesPage() {
             placeholder="Search notices..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
           />
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm">
-            <Filter className="w-4 h-4 text-foreground/50" />
-            <select className="bg-transparent border-none outline-none text-foreground/80 cursor-pointer">
-              <option>All Status</option>
-              <option>Active</option>
-              <option>Expired</option>
-              <option>Draft</option>
-            </select>
-          </div>
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <CustomDropdown 
+            icon={<Filter className="w-3.5 h-3.5 text-foreground/50" />}
+            value={statusFilter}
+            options={["All Status", "Active", "Expired", "Draft"]}
+            onChange={setStatusFilter}
+          />
         </div>
       </div>
 
       {/* Notices List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {MOCK_NOTICES.map((notice, index) => (
+        {filteredNotices.map((notice, index) => (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -139,17 +142,21 @@ export default function AdminNoticesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">Priority</label>
-                  <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
-                    <option>Normal</option>
-                    <option>High</option>
-                  </select>
+                  <CustomDropdown 
+                    value="Normal"
+                    options={["Normal", "High"]}
+                    onChange={() => {}}
+                    buttonClassName="px-4 py-2.5 h-[42px]"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">Status</label>
-                  <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
-                    <option>Active</option>
-                    <option>Draft</option>
-                  </select>
+                  <CustomDropdown 
+                    value="Active"
+                    options={["Active", "Draft"]}
+                    onChange={() => {}}
+                    buttonClassName="px-4 py-2.5 h-[42px]"
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -169,6 +176,62 @@ export default function AdminNoticesPage() {
             </div>
           </motion.div>
         </div>
+      )}
+    </div>
+  );
+}
+
+function CustomDropdown({ value, options, onChange, icon }: { value: string, options: string[], onChange: (val: string) => void, icon?: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl px-3 py-1.5 text-sm text-foreground/80 transition-colors w-full sm:w-auto min-w-[130px] justify-between h-9"
+      >
+        <div className="flex items-center gap-2">
+          {icon}
+          {value}
+        </div>
+        <ChevronDown className={cn("w-3.5 h-3.5 text-foreground/50 transition-transform", isOpen && "rotate-180")} />
+      </button>
+      
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-full mt-2 left-0 w-full min-w-[160px] bg-background/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 p-1.5 flex flex-col gap-0.5"
+        >
+          {options.map((opt) => (
+            <button
+              key={opt}
+              onClick={() => {
+                onChange(opt);
+                setIsOpen(false);
+              }}
+              className={cn(
+                "px-3 py-2 text-sm text-left rounded-lg transition-colors",
+                value === opt ? "bg-primary/20 text-primary font-medium" : "text-foreground/80 hover:bg-white/10 hover:text-foreground"
+              )}
+            >
+              {opt}
+            </button>
+          ))}
+        </motion.div>
       )}
     </div>
   );

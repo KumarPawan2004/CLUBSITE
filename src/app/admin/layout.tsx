@@ -23,13 +23,11 @@ const SIDEBAR_ITEMS = [
   { name: "Testimonials", href: "/admin/testimonials", icon: MessageSquare },
   { name: "Media Library", href: "/admin/media", icon: Folder },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart },
-  { name: "Search Center", href: "/admin/search", icon: Search },
 ];
 
 const BOTTOM_ITEMS = [
   { name: "Profile", href: "/admin/profile", icon: User },
   { name: "Settings", href: "/admin/settings", icon: Settings },
-  { name: "Help Center", href: "/admin/help", icon: LifeBuoy },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
