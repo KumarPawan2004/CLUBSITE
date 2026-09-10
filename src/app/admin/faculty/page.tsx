@@ -6,12 +6,7 @@ import { Plus, Search, Filter, Edit, Trash2, Mail, Phone, ExternalLink } from "l
 import { Button } from "@/components/ui/Button";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
-const MOCK_FACULTY = [
-  { id: 1, name: "Dr. Ananya Sharma", designation: "HOD, Computer Science", department: "Computer Science", email: "ananya.s@ybn.edu", phone: "+91 98765 43210", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&q=80" },
-  { id: 2, name: "Prof. Rajesh Kumar", designation: "Associate Professor", department: "Mechanical Engg.", email: "rajesh.k@ybn.edu", phone: "+91 98765 43211", photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&q=80" },
-  { id: 3, name: "Dr. Meera Patel", designation: "Assistant Professor", department: "Electrical Engg.", email: "meera.p@ybn.edu", phone: "+91 98765 43212", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=500&q=80" },
-  { id: 4, name: "Mr. Vikram Singh", designation: "Lab Instructor", department: "Computer Science", email: "vikram.s@ybn.edu", phone: "+91 98765 43213", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&q=80" },
-];
+const MOCK_FACULTY: any[] = [];
 
 export default function AdminFacultyPage() {
   const [searchTerm, setSearchTerm] = useState("");

@@ -5,6 +5,8 @@ export interface Club {
   name: string;
   slug: string;
   description: string;
+  logo?: string;
+  category?: string;
   color: string;
   gradient: string;
   stats: {

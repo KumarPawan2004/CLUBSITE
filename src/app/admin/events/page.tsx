@@ -7,21 +7,30 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-const MOCK_EVENTS = [
-  { id: 1, title: "Annual Tech Symposium 2026", date: "Aug 25, 2026", time: "10:00 AM", venue: "Main Auditorium", status: "Upcoming", type: "Tech", image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&q=80" },
-  { id: 2, title: "Cultural Fest 'Rhythm'", date: "Sep 15, 2026", time: "05:00 PM", venue: "College Grounds", status: "Upcoming", type: "Cultural", image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&q=80" },
-  { id: 3, title: "Robotics Workshop", date: "Sep 20, 2026", time: "11:00 AM", venue: "Lab 3, Tech Block", status: "Upcoming", type: "Workshop", image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=500&q=80" },
-  { id: 4, title: "Sports Week Finals", date: "Jul 10, 2026", time: "09:00 AM", venue: "Sports Complex", status: "Past", type: "Sports", image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&q=80" },
-];
+import { createClient } from "@/lib/supabase/client";
+import { Event } from "@/types";
 
 export default function AdminEventsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("upcoming");
   const [typeFilter, setTypeFilter] = useState("All Types");
+  
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredEvents = MOCK_EVENTS.filter(event => 
-    (activeTab === "upcoming" ? event.status === "Upcoming" : event.status === "Past") &&
-    (typeFilter === "All Types" || event.type === typeFilter) &&
+  React.useEffect(() => {
+    const fetchEvents = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from('events').select('*');
+      if (data) setEvents(data);
+      setLoading(false);
+    };
+    fetchEvents();
+  }, []);
+
+  const filteredEvents = events.filter(event => 
+    (activeTab === "upcoming" ? event.status !== "Past" : event.status === "Past") &&
+    (typeFilter === "All Types" || event.category === typeFilter) &&
     event.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -78,10 +87,13 @@ export default function AdminEventsPage() {
       </div>
 
       {/* Event Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredEvents.map((event, index) => (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+      {loading ? (
+        <div className="flex justify-center items-center py-20 text-foreground/50">Loading events...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredEvents.map((event, index) => (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             key={event.id}
@@ -93,10 +105,10 @@ export default function AdminEventsPage() {
                 {event.status}
               </div>
               <div className="absolute top-3 right-3 z-10 bg-primary/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium text-white shadow-lg">
-                {event.type}
+                {event.category}
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <img src={event.poster} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
             
             <div className="p-5 flex flex-col flex-1 gap-4">
@@ -131,14 +143,15 @@ export default function AdminEventsPage() {
             </div>
           </motion.div>
         ))}
-        {filteredEvents.length === 0 && (
-          <div className="col-span-full py-12 flex flex-col items-center justify-center text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
-            <CalendarIcon className="w-12 h-12 text-foreground/20 mb-4" />
-            <h3 className="text-lg font-medium">No events found</h3>
-            <p className="text-foreground/50 mt-1">There are no {activeTab} events matching your search.</p>
-          </div>
-        )}
-      </div>
+          {filteredEvents.length === 0 && (
+            <div className="col-span-full py-12 flex flex-col items-center justify-center text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
+              <CalendarIcon className="w-12 h-12 text-foreground/20 mb-4" />
+              <h3 className="text-lg font-medium">No events found</h3>
+              <p className="text-foreground/50 mt-1">There are no {activeTab} events matching your search.</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

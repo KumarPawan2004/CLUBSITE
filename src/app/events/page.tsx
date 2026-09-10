@@ -1,11 +1,25 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { upcomingEvents } from "@/data/mock";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { createClient } from "@/lib/supabase/client";
+import { Event } from "@/types";
 
 export default function EventsPage() {
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from('events').select('*');
+      if (data) setUpcomingEvents(data);
+      setLoading(false);
+    };
+    fetchEvents();
+  }, []);
+
   return (
     <div className="pt-25 pb-15 container mx-auto px-4 md:px-6 min-h-screen">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-16 max-w-3xl">
@@ -15,8 +29,11 @@ export default function EventsPage() {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {upcomingEvents.map((event, i) => (
+      {loading ? (
+        <div className="flex justify-center items-center py-20 text-foreground/50">Loading events...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {upcomingEvents.map((event, i) => (
           <motion.div
             key={event.id}
             initial={{ opacity: 0, scale: 0.95 }}
@@ -59,7 +76,8 @@ export default function EventsPage() {
             </div>
           </motion.div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

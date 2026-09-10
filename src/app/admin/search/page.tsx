@@ -6,14 +6,7 @@ import { Search, Filter, FileText, Calendar, Bell, Users, Award, Image as ImageI
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-const MOCK_RESULTS = [
-  { id: 1, type: "Post", title: "Annual Tech Symposium 2026", desc: "Published in Technology", icon: FileText, color: "text-blue-400", bg: "bg-blue-400/10" },
-  { id: 2, type: "Event", title: "Cultural Fest 'Rhythm'", desc: "Scheduled for Sep 15, 2026", icon: Calendar, color: "text-purple-400", bg: "bg-purple-400/10" },
-  { id: 3, type: "Notice", title: "Semester Exams Schedule", desc: "High Priority - Expires Aug 30", icon: Bell, color: "text-red-400", bg: "bg-red-400/10" },
-  { id: 4, type: "Faculty", title: "Dr. Ananya Sharma", desc: "HOD, Computer Science", icon: Users, color: "text-green-400", bg: "bg-green-400/10" },
-  { id: 5, type: "Achievement", title: "Rahul Sharma - Hackathon", desc: "1st Place - National Level", icon: Award, color: "text-yellow-400", bg: "bg-yellow-400/10" },
-  { id: 6, type: "Media", title: "tech_fest_banner.png", desc: "Image - 4.1 MB", icon: ImageIcon, color: "text-orange-400", bg: "bg-orange-400/10" },
-];
+const MOCK_RESULTS: any[] = [];
 
 export default function AdminSearchCenterPage() {
   const [searchTerm, setSearchTerm] = useState("");

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ArrowRight, Calendar, Users, Trophy, Code, Zap,
@@ -9,7 +9,8 @@ import {
 import { Button } from "@/components/ui/Button";
 import Image from "next/image";
 import Link from "next/link";
-import { upcomingEvents } from "@/data/mock";
+import { createClient } from "@/lib/supabase/client";
+import { Event, Post, Notice, Faculty, GalleryItem } from "@/types";
 
 export default function Home() {
   const containerRef = useRef(null);
@@ -18,11 +19,46 @@ export default function Home() {
     offset: ["start start", "end end"]
   });
 
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [faculty, setFaculty] = useState<Faculty[]>([]);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const supabase = createClient();
+      const [
+        { data: eventsData },
+        { data: postsData },
+        { data: noticesData },
+        { data: facultyData },
+        { data: galleryData }
+      ] = await Promise.all([
+        supabase.from('events').select('*').limit(2),
+        supabase.from('posts').select('*').limit(2),
+        supabase.from('notices').select('*').limit(4),
+        supabase.from('faculty').select('*').limit(4),
+        supabase.from('gallery').select('*').limit(4)
+      ]);
+      
+      if (eventsData) setUpcomingEvents(eventsData);
+      if (postsData) setPosts(postsData);
+      if (noticesData) setNotices(noticesData);
+      if (facultyData) setFaculty(facultyData);
+      if (galleryData) setGallery(galleryData);
+      
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
   return (
     <div className="flex flex-col w-full my-0" ref={containerRef}>
 
       {/* Ticker Section */}
-      <div className="w-full bg-primary/10 border-b border-primary/20 overflow-hidden py-2 z-40 relative mt-20">
+      <div className="w-full bg-primary/10 border-b border-primary/20 overflow-hidden py-2 z-20 relative mt-20">
         <div className="flex whitespace-nowrap animate-[ticker_30s_linear_infinite] hover:[animation-play-state:paused]">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex items-center gap-8 mx-4">
@@ -212,30 +248,30 @@ export default function Home() {
             <div className="lg:col-span-2">
               <h2 className="text-3xl font-bold tracking-tight mb-8">Latest Posts</h2>
               <div className="space-y-6">
-                <SocialPost
-                  author="Tech Club"
-                  time="2 hours ago"
-                  content="Just wrapped up an amazing workshop on React and Next.js! Thanks to everyone who joined. Check out the resources below. 🚀💻"
-                  likes={124}
-                  comments={18}
-                />
-                <SocialPost
-                  author="Cultural Club"
-                  time="5 hours ago"
-                  content="Auditions for the annual theater production 'The Matrix Reborn' are happening this weekend! Don't miss your chance to shine on stage. 🎭✨"
-                  likes={342}
-                  comments={45}
-                />
+                {posts.map(post => (
+                  <SocialPost
+                    key={post.id}
+                    author={post.author}
+                    time={post.date}
+                    content={post.content}
+                    likes={post.likes}
+                    comments={post.comments}
+                  />
+                ))}
               </div>
             </div>
 
             <div>
               <h2 className="text-3xl font-bold tracking-tight mb-8">Notice Board</h2>
               <div className="glass-card rounded-2xl p-6 flex flex-col gap-4">
-                <NoticeItem title="Mid-Semester Examination Schedule" date="Oct 10, 2026" urgent />
-                <NoticeItem title="Call for Research Papers - IEEE Conference" date="Oct 08, 2026" />
-                <NoticeItem title="Holiday Declaration: Diwali Break" date="Oct 05, 2026" />
-                <NoticeItem title="Library Membership Renewal Notice" date="Oct 01, 2026" />
+                {notices.map(notice => (
+                  <NoticeItem 
+                    key={notice.id} 
+                    title={notice.title} 
+                    date={notice.date} 
+                    urgent={notice.urgent} 
+                  />
+                ))}
                 <Link href="/notice" className="w-full mt-2">
                   <Button variant="outline" className="w-full">View All Notices</Button>
                 </Link>
@@ -289,16 +325,18 @@ export default function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="glass-card rounded-3xl p-6 flex flex-col items-center text-center group hover:-translate-y-2 transition-transform duration-300">
+            {faculty.map((member) => (
+              <div key={member.id} className="glass-card rounded-3xl p-6 flex flex-col items-center text-center group hover:-translate-y-2 transition-transform duration-300">
                 <div className="w-24 h-24 rounded-full bg-white/10 mb-4 border-2 border-primary/20 group-hover:border-primary/60 transition-colors overflow-hidden flex items-center justify-center">
                   <Users className="w-8 h-8 text-white/30" />
                 </div>
-                <h3 className="font-bold text-lg mb-1">Dr. Professor {i}</h3>
-                <p className="text-primary text-sm font-medium mb-4">Head of Department</p>
-                <p className="text-sm text-foreground/60 mb-6 line-clamp-2">Research interests include Artificial Intelligence and Quantum Computing.</p>
+                <h3 className="font-bold text-lg mb-1">{member.name}</h3>
+                <p className="text-primary text-sm font-medium mb-4">{member.designation}</p>
+                <p className="text-sm text-foreground/60 mb-6 line-clamp-2">Research interests include {member.researchAreas.join(', ')}.</p>
                 <div className="flex gap-2 w-full">
-                  <Button variant="outline" size="sm" className="w-full">Profile</Button>
+                  <Link href="/department#faculty" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full">Profile</Button>
+                  </Link>
                 </div>
               </div>
             ))}

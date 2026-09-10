@@ -1,11 +1,25 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { notices } from "@/data/mock";
 import { FileText, Download, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { createClient } from "@/lib/supabase/client";
+import { Notice } from "@/types";
 
 export default function NoticePage() {
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotices = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from('notices').select('*');
+      if (data) setNotices(data);
+      setLoading(false);
+    };
+    fetchNotices();
+  }, []);
+
   return (
     <div className="pt-32 pb-24 container mx-auto px-4 md:px-6 min-h-screen">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 max-w-3xl">
@@ -24,8 +38,11 @@ export default function NoticePage() {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 gap-4 max-w-4xl">
-        {notices.map((notice, i) => (
+      {loading ? (
+        <div className="flex justify-center items-center py-20 text-foreground/50">Loading notices...</div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 max-w-4xl">
+          {notices.map((notice, i) => (
           <motion.div 
             key={notice.id}
             initial={{ opacity: 0, x: -20 }}
@@ -51,7 +68,8 @@ export default function NoticePage() {
             </Button>
           </motion.div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

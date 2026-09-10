@@ -7,23 +7,30 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-// Mock Data
-const MOCK_POSTS = [
-  { id: 1, title: "Annual Tech Symposium 2026", category: "Technology", author: "Admin", date: "Aug 18, 2026", status: "Published", image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&q=80" },
-  { id: 2, title: "Cultural Fest Highlights", category: "Events", author: "Student Council", date: "Aug 15, 2026", status: "Draft", image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&q=80" },
-  { id: 3, title: "New Robotics Lab Inauguration", category: "News", author: "Admin", date: "Aug 10, 2026", status: "Published", image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=500&q=80" },
-  { id: 4, title: "Sports Week Winners Announced", category: "Sports", author: "Sports Comm.", date: "Aug 05, 2026", status: "Published", image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&q=80" },
-  { id: 5, title: "Alumni Meet 2026 - Save the Date", category: "Alumni", author: "Admin", date: "Jul 28, 2026", status: "Draft", image: "https://images.unsplash.com/photo-1523580494112-071dcb92a71d?w=500&q=80" },
-];
+import { createClient } from "@/lib/supabase/client";
+import { Post } from "@/types";
 
 export default function AdminPostsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
 
-  const filteredPosts = MOCK_POSTS.filter((post) => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchPosts = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from('posts').select('*');
+      if (data) setPosts(data);
+      setLoading(false);
+    };
+    fetchPosts();
+  }, []);
+
+  const filteredPosts = posts.filter((post) => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "All Status" || post.status === statusFilter;
+    const matchesStatus = statusFilter === "All Status" || true; // Mocking status filter for now since Supabase posts don't have a status column in our schema
     const matchesCategory = categoryFilter === "All Categories" || post.category === categoryFilter;
     return matchesSearch && matchesStatus && matchesCategory;
   });
@@ -71,87 +78,78 @@ export default function AdminPostsPage() {
       </div>
 
       {/* Posts Table */}
-      <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-white/5 text-foreground/70 uppercase text-xs">
-              <tr>
-                <th className="px-6 py-4 font-medium">Post</th>
-                <th className="px-6 py-4 font-medium">Category</th>
-                <th className="px-6 py-4 font-medium">Author</th>
-                <th className="px-6 py-4 font-medium">Date</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filteredPosts.length > 0 ? filteredPosts.map((post, index) => (
-                <motion.tr 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  key={post.id} 
-                  className="hover:bg-white/[0.02] transition-colors group"
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-white/10 overflow-hidden shrink-0">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
-                      </div>
-                      <span className="font-medium text-base group-hover:text-primary transition-colors line-clamp-1">{post.title}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-foreground/70">{post.category}</td>
-                  <td className="px-6 py-4 text-foreground/70">{post.author}</td>
-                  <td className="px-6 py-4 text-foreground/70">{post.date}</td>
-                  <td className="px-6 py-4">
-                    <span className={cn(
-                      "px-2.5 py-1 rounded-full text-xs font-medium border",
-                      post.status === "Published" 
-                        ? "bg-green-500/10 text-green-400 border-green-500/20" 
-                        : "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-                    )}>
-                      {post.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 rounded-lg hover:bg-white/10 text-foreground/60 hover:text-foreground transition-colors" title="View">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 rounded-lg hover:bg-primary/20 text-foreground/60 hover:text-primary transition-colors" title="Edit">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 rounded-lg hover:bg-red-500/20 text-foreground/60 hover:text-red-400 transition-colors" title="Delete">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </motion.tr>
-              )) : (
+      {loading ? (
+        <div className="flex justify-center items-center py-20 text-foreground/50">Loading posts...</div>
+      ) : (
+        <div className="glass-card rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-white/5 text-foreground/70 uppercase text-xs">
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-foreground/50">
-                    No posts found matching the selected filters.
-                  </td>
+                  <th className="px-6 py-4 font-medium">Post</th>
+                  <th className="px-6 py-4 font-medium">Category</th>
+                  <th className="px-6 py-4 font-medium">Author</th>
+                  <th className="px-6 py-4 font-medium">Date</th>
+                  <th className="px-6 py-4 font-medium text-right">Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Pagination */}
-        <div className="p-4 border-t border-white/5 flex items-center justify-between text-sm text-foreground/60">
-          <span>Showing 1 to 5 of 48 posts</span>
-          <div className="flex gap-1">
-            <button className="px-3 py-1 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50" disabled>Prev</button>
-            <button className="px-3 py-1 rounded-lg bg-primary text-primary-foreground">1</button>
-            <button className="px-3 py-1 rounded-lg hover:bg-white/10 transition-colors">2</button>
-            <button className="px-3 py-1 rounded-lg hover:bg-white/10 transition-colors">3</button>
-            <button className="px-3 py-1 rounded-lg hover:bg-white/10 transition-colors">Next</button>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filteredPosts.length > 0 ? filteredPosts.map((post, index) => (
+                  <motion.tr 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    key={post.id} 
+                    className="hover:bg-white/[0.02] transition-colors group"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-white/10 overflow-hidden shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                        </div>
+                        <span className="font-medium text-base group-hover:text-primary transition-colors line-clamp-1">{post.title}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-foreground/70">{post.category}</td>
+                    <td className="px-6 py-4 text-foreground/70">{post.author}</td>
+                    <td className="px-6 py-4 text-foreground/70">{post.date}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button className="p-2 rounded-lg hover:bg-white/10 text-foreground/60 hover:text-foreground transition-colors" title="View">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 rounded-lg hover:bg-primary/20 text-foreground/60 hover:text-primary transition-colors" title="Edit">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 rounded-lg hover:bg-red-500/20 text-foreground/60 hover:text-red-400 transition-colors" title="Delete">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                )) : (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-foreground/50">
+                      No posts found matching the selected filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination */}
+          <div className="p-4 border-t border-white/5 flex items-center justify-between text-sm text-foreground/60">
+            <span>Showing 1 to {filteredPosts.length} posts</span>
+            <div className="flex gap-1">
+              <button className="px-3 py-1 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50" disabled>Prev</button>
+              <button className="px-3 py-1 rounded-lg bg-primary text-primary-foreground">1</button>
+              <button className="px-3 py-1 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50" disabled>Next</button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

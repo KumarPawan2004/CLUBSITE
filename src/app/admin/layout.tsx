@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 const SIDEBAR_ITEMS = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Clubs", href: "/admin/clubs", icon: LifeBuoy },
   { name: "Posts", href: "/admin/posts", icon: FileText },
   { name: "Events", href: "/admin/events", icon: Calendar },
   { name: "Gallery", href: "/admin/gallery", icon: ImageIcon },
@@ -35,6 +36,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) setCollapsed(true);
+    };
+    
+    // Initial check
+    handleResize();
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Skip auth check for login page itself
@@ -72,12 +88,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/5 blur-[120px]" />
       </div>
 
+      {/* Mobile Backdrop */}
+      {isMobile && !collapsed && (
+        <div 
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
+          onClick={() => setCollapsed(true)}
+        />
+      )}
+
       {/* Sidebar */}
       <motion.aside 
-        initial={{ width: 280 }}
-        animate={{ width: collapsed ? 80 : 280 }}
+        initial={{ width: 280, x: 0 }}
+        animate={{ 
+          width: collapsed ? (isMobile ? 0 : 80) : 280,
+          x: collapsed && isMobile ? -280 : 0
+        }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="h-full glass-card border-y-0 border-l-0 rounded-none z-10 flex flex-col relative shrink-0"
+        className={cn(
+          "h-full glass-card border-y-0 border-l-0 rounded-none z-50 flex flex-col shrink-0",
+          isMobile ? "fixed left-0 top-0 bottom-0" : "relative"
+        )}
       >
         <div className={cn("h-12 flex items-center border-b border-white/5", collapsed ? "justify-center" : "px-6 justify-between")}>
           {!collapsed && (
@@ -150,7 +180,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full overflow-hidden z-10 relative">
-        <header className="h-12 glass-nav shrink-0 flex items-center justify-end px-8 border-b border-white/5 z-20">
+        <header className="h-12 glass-nav shrink-0 flex items-center justify-between px-4 md:px-8 border-b border-white/5 z-20">
+          <div className="flex items-center">
+            {isMobile && collapsed && (
+              <button 
+                onClick={() => setCollapsed(false)}
+                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors"
+              >
+                <MenuIcon className="w-5 h-5" />
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-4">
             <button className="w-8 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors relative">
               <Bell className="w-5 h-5 text-foreground/70" />

@@ -6,12 +6,7 @@ import { Plus, Search, Filter, Trophy, Edit, Trash2, Award, Calendar, ExternalLi
 import { Button } from "@/components/ui/Button";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
-const MOCK_ACHIEVEMENTS = [
-  { id: 1, name: "Rahul Sharma", title: "1st Place - National Hackathon", category: "Technology", date: "Aug 10, 2026", desc: "Won the first prize in the Smart India Hackathon 2026 for developing an AI-based agriculture solution.", hasCertificate: true },
-  { id: 2, name: "YBN Robotics Club", title: "Best Innovation Award", category: "Club", date: "Jul 25, 2026", desc: "Received the Best Innovation Award at Techfest IIT Bombay.", hasCertificate: true },
-  { id: 3, name: "Priya Patel", title: "Gold Medalist - State Athletics", category: "Sports", date: "Jun 15, 2026", desc: "Secured gold in 100m sprint at the State Level Inter-University Sports Meet.", hasCertificate: false },
-  { id: 4, name: "Drama Society", title: "Best Play - 'Nukkad Natak'", category: "Cultural", date: "May 20, 2026", desc: "Won the best play award at the National Youth Festival.", hasCertificate: true },
-];
+const MOCK_ACHIEVEMENTS: any[] = [];
 
 export default function AdminAchievementsPage() {
   const [searchTerm, setSearchTerm] = useState("");

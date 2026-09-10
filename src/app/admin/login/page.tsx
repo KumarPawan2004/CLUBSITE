@@ -6,15 +6,22 @@ import { motion } from "framer-motion";
 import { Terminal, Lock, ArrowRight, ShieldCheck, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
+import { verifyPasscode } from "@/actions/admin";
+
 export default function AdminLogin() {
   const [key, setKey] = useState("");
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (key === "ADMIN@DAC2023") {
-      setError(false);
+    setLoading(true);
+    setError(false);
+    
+    const isValid = await verifyPasscode(key);
+    
+    if (isValid) {
       // Simulate login by setting a flag in sessionStorage
       if (typeof window !== "undefined") {
         sessionStorage.setItem("ybn_admin_auth", "true");
@@ -24,6 +31,7 @@ export default function AdminLogin() {
       setError(true);
       setKey("");
     }
+    setLoading(false);
   };
 
   return (
@@ -81,9 +89,9 @@ export default function AdminLogin() {
             </motion.div>
           )}
 
-          <Button type="submit" className="w-full h-12 mt-4 text-sm font-bold gap-2">
+          <Button type="submit" disabled={loading} className="w-full h-12 mt-4 text-sm font-bold gap-2">
             <ShieldCheck className="w-4 h-4" />
-            Authenticate
+            {loading ? "Authenticating..." : "Authenticate"}
           </Button>
         </form>
 

@@ -6,17 +6,9 @@ import { Plus, Search, Filter, Image as ImageIcon, Trash2, Edit, CheckSquare, Sq
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-const MOCK_ALBUMS = [
-  { id: 1, title: "Tech Symposium 2026", count: 45, date: "Aug 25, 2026", cover: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&q=80" },
-  { id: 2, title: "Cultural Fest 'Rhythm'", count: 120, date: "Sep 15, 2026", cover: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&q=80" },
-  { id: 3, title: "Robotics Workshop", count: 24, date: "Sep 20, 2026", cover: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=500&q=80" },
-];
+const MOCK_ALBUMS: any[] = [];
 
-const MOCK_IMAGES = Array.from({ length: 12 }).map((_, i) => ({
-  id: i,
-  url: `https://images.unsplash.com/photo-${1500000000000 + i * 100000}?w=500&q=80`,
-  selected: false
-}));
+const MOCK_IMAGES: any[] = [];
 
 export default function AdminGalleryPage() {
   const [activeTab, setActiveTab] = useState("albums");

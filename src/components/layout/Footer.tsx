@@ -53,9 +53,7 @@ export default function Footer() {
             <h3 className="font-semibold text-lg mb-6 text-foreground/90">Resources</h3>
             <ul className="space-y-4">
               <FooterLink href="/notice">Notice Board</FooterLink>
-              <FooterLink href="/faculty">Faculty Team</FooterLink>
-              <FooterLink href="/calendar">Academic Calendar</FooterLink>
-              <FooterLink href="/login">Student Portal</FooterLink>
+              <FooterLink href="/department#faculty">Faculty Team</FooterLink>
               <FooterLink href="/admin">Admin Dashboard</FooterLink>
             </ul>
           </div>

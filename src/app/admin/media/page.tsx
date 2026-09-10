@@ -7,14 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
-const MOCK_MEDIA = [
-  { id: 1, name: "campus_front.jpg", type: "image", size: "2.4 MB", date: "Aug 18, 2026", url: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=500&q=80" },
-  { id: 2, name: "tech_fest_banner.png", type: "image", size: "4.1 MB", date: "Aug 15, 2026", url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&q=80" },
-  { id: 3, name: "annual_report_2025.pdf", type: "document", size: "12.8 MB", date: "Jul 10, 2026", url: "" },
-  { id: 4, name: "alumni_meet_promo.mp4", type: "video", size: "45.2 MB", date: "Jun 22, 2026", url: "" },
-  { id: 5, name: "sports_meet_logo.svg", type: "image", size: "156 KB", date: "May 14, 2026", url: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&q=80" },
-  { id: 6, name: "syllabus_update.docx", type: "document", size: "1.2 MB", date: "Apr 05, 2026", url: "" },
-];
+const MOCK_MEDIA: any[] = [];
 
 export default function AdminMediaLibraryPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");

@@ -40,8 +40,8 @@ export default function Navbar() {
   return (
     <motion.header
       className={cn(
-        "fixed top-0 w-full z-30 transition-all duration-300",
-        scrolled ? "glass-nav py-1" : "glass-nav py-3border-transparent"
+        "fixed top-0 w-full z-50 transition-all duration-300",
+        scrolled ? "glass-nav py-1" : "glass-nav py-3 border-transparent"
       )}
     >
       <div className="container mx-auto px-4 md:px-6">
@@ -135,10 +135,7 @@ export default function Navbar() {
 
               <div className="pt-6 border-t border-white/10 flex flex-col gap-3">
                 <Link href="/admin/login" onClick={() => setMobileMenuOpen(false)} className="w-full">
-                  <Button variant="outline" className="w-full justify-center">Login</Button>
-                </Link>
-                <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="w-full">
-                  <Button variant="primary" className="w-full justify-center">Admin Dashboard</Button>
+                  <Button variant="primary" className="w-full justify-center">Admin</Button>
                 </Link>
               </div>
             </motion.div>

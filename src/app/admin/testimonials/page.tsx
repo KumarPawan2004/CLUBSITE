@@ -7,12 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
-const MOCK_TESTIMONIALS = [
-  { id: 1, name: "Priya Singh", course: "B.Tech CSE - Alumni 2024", text: "The tech club provided me with the platform to showcase my skills and learn from the best. The hackathons were a turning point in my career.", status: "Approved", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&q=80" },
-  { id: 2, name: "Rahul Verma", course: "BBA - 3rd Year", text: "Being part of the organizing committee for the cultural fest was an amazing experience. It taught me invaluable management skills.", status: "Pending", photo: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=500&q=80" },
-  { id: 3, name: "Anjali Gupta", course: "B.Tech ECE - Alumni 2025", text: "The robotics workshops were hands-on and incredibly informative. I highly recommend joining the club.", status: "Approved", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=500&q=80" },
-  { id: 4, name: "Amit Kumar", course: "B.Sc Physics - 2nd Year", text: "I found a great community here. The events are well-organized and everyone is very supportive.", status: "Approved", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80" },
-];
+const MOCK_TESTIMONIALS: any[] = [];
 
 export default function AdminTestimonialsPage() {
   const [searchTerm, setSearchTerm] = useState("");

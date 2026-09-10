@@ -6,20 +6,29 @@ import { Plus, Search, Filter, BellRing, Edit, Trash2, Calendar, AlertCircle, Ch
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-const MOCK_NOTICES = [
-  { id: 1, title: "Semester Exams Schedule Released", desc: "The final examination schedule for Even Semester 2026 has been published.", priority: "High", publishDate: "Aug 15, 2026", expiryDate: "Aug 30, 2026", status: "Active" },
-  { id: 2, title: "Holiday Declaration - Independence Day", desc: "College will remain closed on 15th August 2026.", priority: "Normal", publishDate: "Aug 12, 2026", expiryDate: "Aug 16, 2026", status: "Expired" },
-  { id: 3, title: "Library Membership Renewal", desc: "All students are requested to renew their library cards by the end of this month.", priority: "Normal", publishDate: "Aug 05, 2026", expiryDate: "Aug 31, 2026", status: "Active" },
-  { id: 4, title: "Urgent: Fee Payment Deadline", desc: "Last date for semester fee payment without late fine is extended.", priority: "High", publishDate: "Aug 01, 2026", expiryDate: "Aug 10, 2026", status: "Expired" },
-];
+import { createClient } from "@/lib/supabase/client";
+import { Notice } from "@/types";
 
 export default function AdminNoticesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("All Status");
 
-  const filteredNotices = MOCK_NOTICES.filter(notice => 
-    (statusFilter === "All Status" || notice.status === statusFilter) &&
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchNotices = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from('notices').select('*');
+      if (data) setNotices(data);
+      setLoading(false);
+    };
+    fetchNotices();
+  }, []);
+
+  const filteredNotices = notices.filter(notice => 
+    (statusFilter === "All Status" || true) && // status mock
     notice.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -59,62 +68,61 @@ export default function AdminNoticesPage() {
       </div>
 
       {/* Notices List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredNotices.map((notice, index) => (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            key={notice.id}
-            className="glass-card p-6 rounded-2xl flex flex-col gap-4 group hover:-translate-y-1 transition-transform relative overflow-hidden"
-          >
-            {notice.priority === "High" && (
-              <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
-            )}
-            <div className="flex justify-between items-start gap-4">
-              <div className="flex items-start gap-3">
-                <div className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                  notice.priority === "High" ? "bg-red-500/10 text-red-400" : "bg-primary/10 text-primary"
+      {loading ? (
+        <div className="flex justify-center items-center py-20 text-foreground/50">Loading notices...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {filteredNotices.map((notice, index) => (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              key={notice.id}
+              className="glass-card p-6 rounded-2xl flex flex-col gap-4 group hover:-translate-y-1 transition-transform relative overflow-hidden"
+            >
+              {notice.urgent && (
+                <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
+              )}
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex items-start gap-3">
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                    notice.urgent ? "bg-red-500/10 text-red-400" : "bg-primary/10 text-primary"
+                  )}>
+                    {notice.urgent ? <AlertCircle className="w-5 h-5" /> : <BellRing className="w-5 h-5" />}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg leading-tight mb-1 group-hover:text-primary transition-colors">{notice.title}</h3>
+                    <p className="text-sm text-foreground/70 line-clamp-2">{notice.category}</p>
+                  </div>
+                </div>
+                <span className={cn(
+                  "px-2.5 py-1 rounded-full text-xs font-medium border shrink-0",
+                  "bg-green-500/10 text-green-400 border-green-500/20" 
                 )}>
-                  {notice.priority === "High" ? <AlertCircle className="w-5 h-5" /> : <BellRing className="w-5 h-5" />}
+                  Active
+                </span>
+              </div>
+              
+              <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-4 text-xs text-foreground/60">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" /> Date: {notice.date}
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-lg leading-tight mb-1 group-hover:text-primary transition-colors">{notice.title}</h3>
-                  <p className="text-sm text-foreground/70 line-clamp-2">{notice.desc}</p>
+                <div className="flex gap-2">
+                  <button className="w-8 h-8 rounded-lg hover:bg-primary/20 text-foreground/50 hover:text-primary flex items-center justify-center transition-colors">
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button className="w-8 h-8 rounded-lg hover:bg-red-500/20 text-foreground/50 hover:text-red-400 flex items-center justify-center transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-              <span className={cn(
-                "px-2.5 py-1 rounded-full text-xs font-medium border shrink-0",
-                notice.status === "Active" 
-                  ? "bg-green-500/10 text-green-400 border-green-500/20" 
-                  : "bg-gray-500/10 text-gray-400 border-gray-500/20"
-              )}>
-                {notice.status}
-              </span>
-            </div>
-            
-            <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-4 text-xs text-foreground/60">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" /> Published: {notice.publishDate}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" /> Expiry: {notice.expiryDate}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button className="w-8 h-8 rounded-lg hover:bg-primary/20 text-foreground/50 hover:text-primary flex items-center justify-center transition-colors">
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button className="w-8 h-8 rounded-lg hover:bg-red-500/20 text-foreground/50 hover:text-red-400 flex items-center justify-center transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Mock Modal for Create Notice */}
       {isModalOpen && (

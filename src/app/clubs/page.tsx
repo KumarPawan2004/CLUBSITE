@@ -1,12 +1,26 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { clubs } from "@/data/mock";
 import { ArrowRight, Users, Code, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import { Club } from "@/types";
 
 export default function ClubsPage() {
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchClubs = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from('clubs').select('*');
+      if (data) setClubs(data);
+      setLoading(false);
+    };
+    fetchClubs();
+  }, []);
+
   return (
     <div className="pt-25 pb-24 container mx-auto px-4 md:px-6 min-h-screen">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 max-w-3xl">
@@ -16,8 +30,11 @@ export default function ClubsPage() {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {clubs.map((club, i) => (
+      {loading ? (
+        <div className="flex justify-center items-center py-20 text-foreground/50">Loading clubs...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {clubs.map((club, i) => (
           <motion.div
             key={club.id}
             initial={{ opacity: 0, y: 20 }}
@@ -25,10 +42,18 @@ export default function ClubsPage() {
             transition={{ delay: i * 0.1 }}
             className={`glass-card p-8 flex flex-col items-start shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all duration-300 group`}
           >
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 border border-white/10 bg-white/5 group-hover:scale-110 transition-transform duration-300`}>
-              <Users className="w-8 h-8 text-white/80" />
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 border border-white/10 bg-white/5 group-hover:scale-110 transition-transform duration-300 overflow-hidden`}>
+              {club.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={club.logo} alt={club.name} className="w-full h-full object-cover" />
+              ) : (
+                <Users className="w-8 h-8 text-white/80" />
+              )}
             </div>
-            <h3 className="text-2xl font-bold mb-3">{club.name}</h3>
+            <div>
+              {club.category && <p className="text-primary text-xs font-medium uppercase tracking-wider mb-1">{club.category}</p>}
+              <h3 className="text-2xl font-bold mb-3">{club.name}</h3>
+            </div>
             <p className="text-foreground/60 mb-8 flex-1 leading-relaxed">{club.description}</p>
             
             <div className="flex gap-4 mb-8 w-full border-y border-white/5 py-4">
@@ -51,7 +76,8 @@ export default function ClubsPage() {
             </Link>
           </motion.div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

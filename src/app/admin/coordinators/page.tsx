@@ -6,12 +6,7 @@ import { Plus, Search, Filter, Edit, Trash2, Mail, Phone, ExternalLink, ShieldCh
 import { Button } from "@/components/ui/Button";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
-const MOCK_COORDINATORS = [
-  { id: 1, name: "Arjun Mehta", role: "President", course: "B.Tech CSE - 4th Year", responsibility: "Overall Management", email: "arjun.m@student.ybn.edu", phone: "+91 98765 12340", photo: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=500&q=80" },
-  { id: 2, name: "Riya Sharma", role: "Vice President", course: "B.Tech ECE - 4th Year", responsibility: "Event Operations", email: "riya.s@student.ybn.edu", phone: "+91 98765 12341", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&q=80" },
-  { id: 3, name: "Karan Singh", role: "Technical Head", course: "B.Tech CSE - 3rd Year", responsibility: "IT & Web Development", email: "karan.s@student.ybn.edu", phone: "+91 98765 12342", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80" },
-  { id: 4, name: "Sneha Patel", role: "PR Head", course: "BBA - 3rd Year", responsibility: "Public Relations & Media", email: "sneha.p@student.ybn.edu", phone: "+91 98765 12343", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=500&q=80" },
-];
+const MOCK_COORDINATORS: any[] = [];
 
 export default function AdminCoordinatorsPage() {
   const [searchTerm, setSearchTerm] = useState("");

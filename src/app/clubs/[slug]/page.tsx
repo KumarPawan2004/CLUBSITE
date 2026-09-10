@@ -1,18 +1,46 @@
 "use client";
-import React, { use } from "react";
+
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { clubs } from "@/data/mock";
 import { ArrowLeft, Users, Calendar, Trophy, Mail } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { Club } from "@/types";
 
-export default function ClubDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const resolvedParams = use(params);
-  const club = clubs.find(c => c.slug === resolvedParams.slug);
+export default function ClubDetailPage() {
+  const { slug } = useParams();
+  const router = useRouter();
+  const [club, setClub] = useState<Club | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchClub = async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('clubs')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+        
+      if (data) setClub(data);
+      setLoading(false);
+    };
+    fetchClub();
+  }, [slug]);
+
+  if (loading) {
+    return <div className="pt-25 pb-24 container mx-auto px-4 md:px-6 min-h-screen flex items-center justify-center">Loading club...</div>;
+  }
 
   if (!club) {
-    notFound();
+    return (
+      <div className="pt-25 pb-24 container mx-auto px-4 md:px-6 min-h-screen flex flex-col items-center justify-center">
+        <h1 className="text-3xl font-bold mb-4">Club Not Found</h1>
+        <Button onClick={() => router.push("/clubs")}>Back to Clubs</Button>
+      </div>
+    );
   }
 
   return (
